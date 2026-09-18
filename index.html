@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Standard Grating Diffraction (Fraunhofer) + Derivative</title>
+<title>Standard Grating Diffraction (Fraunhofer)</title>
 <style>
   :root{
     --bg: #0a0e12;
@@ -10,8 +10,6 @@
     --panel-line: #24303a;
     --trace: #6fe0a8;
     --trace-dim: #2f6b4c;
-    --deriv: #ff8ad1;
-    --deriv-dim: #803a5f;
     --grid: #1c262f;
     --grid-strong: #2e3d49;
     --cyan: #57d8e0;
@@ -90,14 +88,12 @@
   }
   .legend .sw{ display:inline-block; width:14px; height:2px; margin-right:5px; vertical-align:middle; }
   .legend .sw.solid{ background:var(--trace); }
-  .legend .sw.dash{ background:var(--deriv); }
   .scrubreadout{
     font-size:12px; margin-bottom:8px; padding:8px 12px; border-radius:6px;
     background:var(--panel); border:1px solid var(--panel-line); color:var(--text-dim);
     display:flex; flex-wrap:wrap; gap:16px; align-items:center; min-height:16px;
   }
   .scrubreadout b.iv{ color:var(--trace); }
-  .scrubreadout b.dv{ color:var(--deriv); }
   .scrubreadout .label{ color:var(--text-dim); font-size:10.5px; text-transform:uppercase; letter-spacing:0.8px; }
   .progresswrap{
     height:3px; width:100%; background:#0d1318;
@@ -118,15 +114,13 @@
   .peaktable th:first-child, .peaktable td:first-child{ text-align:left; }
   .peaktable th{ color:var(--text-dim); font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:0.6px; }
   .peaktable td.iv{ color:var(--trace); }
-  .peaktable td.dvmax{ color:var(--deriv); }
-  .peaktable td.dvmin{ color:var(--deriv); opacity:0.75; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>Standard N-slit grating diffraction, I(x) &mdash; Fraunhofer (far-field), with dI/dx overlay</h1>
-    <p>This is the textbook multi-slit diffraction-grating formula, coded independently of the exact-path (Fresnel) equation. N grooves of spacing 1/&Lambda; are illuminated at angle &alpha; to the grating surface; the screen sits a perpendicular distance d&#8320; away, with the grating surface tilted by &beta; from the screen's normal. In the far field the phase from groove to groove grows <i>linearly</i> with groove index n, so the coherent sum collapses to the closed-form grating function below. The second-colour curve is the numerical derivative of this same trace, read off the right-hand axis.</p>
+    <h1>Standard N-slit grating diffraction, I(x) &mdash; Fraunhofer (far-field)</h1>
+    <p>This is the textbook multi-slit diffraction-grating formula, coded independently of the exact-path (Fresnel) equation. N grooves of spacing 1/&Lambda; are illuminated at angle &alpha; to the grating surface; the screen sits a perpendicular distance d&#8320; away, with the grating surface tilted by &beta; from the screen's normal. In the far field the phase from groove to groove grows <i>linearly</i> with groove index n, so the coherent sum collapses to the closed-form grating function below.</p>
     <p class="eqn mono">&phi;(x) = (2&pi;/&lambda;&Lambda;)&middot;[ (d&#8320;cos&beta; &minus; x&middot;sin&beta;)/&radic;(d&#8320;&sup2;+x&sup2;) &minus; cos&alpha; ]</p>
     <p class="eqn mono">I(x) = A&#8320;&sup2; &middot; [ sin((N+1)&phi;/2) / sin(&phi;/2) ]&sup2;</p>
   </header>
@@ -163,15 +157,13 @@
         </div>
         <div class="warn">Use the same Δx when comparing windows. Smaller Δx resolves narrower peaks, but takes longer.</div>
         <label class="check"><input type="checkbox" id="v_log" checked> Log scale (left axis)</label>
-        <label class="check"><input type="checkbox" id="v_intensity" checked> Show intensity I(x)</label>
-        <label class="check"><input type="checkbox" id="v_deriv" checked> Show derivative dI/dx (right axis)</label>
         <label class="check"><input type="checkbox" id="v_smooth" checked> Smooth curve (remove fine ripples)</label>
         <div class="field" style="margin-top:6px;"><label>Smoothing window (mm)</label><input id="smoothWindow" type="number" value="0.1" min="0.05" step="0.05"></div>
         <div class="btnrow" style="margin-top:10px;">
           <button class="primary" id="btnCompute">Sweep ▸</button>
           <button class="small" id="btnReset">Reset view</button>
         </div>
-        <div class="warn">This model gives one clean principal maximum at x = 0 with fast-decaying ripples. The derivative trace shares the x-axis but has its own scale on the right.</div>
+        <div class="warn">This model gives one clean principal maximum at x = 0 with fast-decaying ripples.</div>
       </div>
 
       <div class="panel">
@@ -193,7 +185,6 @@
         <canvas id="plot"></canvas>
         <div class="legend" id="legend">
           <span id="legendIntensity"><span class="sw solid"></span>I(x)</span>
-          <span><span class="sw dash"></span>dI/dx</span>
         </div>
         <div class="hint">move mouse to inspect</div>
         <div class="progresswrap"><div class="progressbar" id="progressbar"></div></div>
@@ -202,8 +193,6 @@
         <span>N emitters: <b id="statN">–</b></span>
         <span>x range: <b id="statRange">–</b></span>
         <span>max I: <b id="statMax">–</b></span>
-        <span>max dI/dx: <b id="statMaxDeriv">–</b></span>
-        <span>min dI/dx: <b id="statMinDeriv">–</b></span>
         <span>compute time: <b id="statTime">–</b></span>
       </div>
       <div class="panel" style="margin-top:10px;">
@@ -211,7 +200,6 @@
         <div class="row2" style="max-width:320px;">
           <div class="field"><label>Peak threshold (% of window max I)</label><input id="peakThreshold" type="number" value="5" min="0" max="100" step="1"></div>
         </div>
-        <div class="warn" style="color:var(--text-dim);">With smoothing on, max dI/dx is the steepest slope on the way up into each peak, and min dI/dx is the steepest slope on the way down out of it &mdash; the fine ripples that used to blur that out are filtered first.</div>
         <div id="peakList" class="mono" style="font-size:11.5px; color:var(--text-dim);">Run a sweep to detect peaks.</div>
       </div>
     </div>
@@ -226,17 +214,16 @@
   const wrap = $('canvasWrap');
   const scrubReadout = $('scrubReadout');
   const progressbar = $('progressbar');
-  const legend = $('legend');
 
-  let logicalW = 900, logicalH = 460;
+  // Fixed drawing and export size. CSS scales this canvas to fit the window.
+  const GRAPH_W = 900, GRAPH_H = 460, EXPORT_SCALE = 2;
+  let logicalW = GRAPH_W, logicalH = GRAPH_H;
   function resizeCanvas(){
-    const rect = wrap.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    logicalW = Math.max(300, rect.width);
-    logicalH = 460;
-    canvas.width = Math.round(logicalW*dpr);
-    canvas.height = Math.round(logicalH*dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
+    logicalW = GRAPH_W;
+    logicalH = GRAPH_H;
+    canvas.width = GRAPH_W*EXPORT_SCALE;
+    canvas.height = GRAPH_H*EXPORT_SCALE;
+    ctx.setTransform(EXPORT_SCALE,0,0,EXPORT_SCALE,0,0);
   }
   window.addEventListener('resize', ()=>{ resizeCanvas(); if(lastResult) redrawFromCache(); });
   resizeCanvas();
@@ -253,16 +240,6 @@
     };
   }
 
-  // Standard Fraunhofer N-slit grating intensity, in closed form.
-  // Derived independently from first principles for this geometry:
-  //   - groove spacing g = 1/Lambda
-  //   - incidence angle alpha measured from the grating surface, so the extra
-  //     path length light travels to reach groove n (vs groove 0) is n*g*cos(alpha)
-  //   - the screen normal is tilted by beta from the grating surface, so the
-  //     far-field diffraction direction to screen point x projects onto the
-  //     grating as (d0*cos(beta) - x*sin(beta)) / r0, with r0 = sqrt(d0^2+x^2)
-  //   - the per-groove phase step is then linear in n, so summing N+1 equal
-  //     phasors gives the classic sin((N+1)phi/2)/sin(phi/2) grating function.
   function intensityAt(x, pr, N){
     const r0 = Math.sqrt(pr.d0*pr.d0 + x*x);
     const bracket = (pr.d0*Math.cos(pr.beta) - x*Math.sin(pr.beta))/r0 - Math.cos(pr.alpha);
@@ -288,9 +265,9 @@
     return v.toFixed(3);
   }
 
-  function drawDualAxes(xMin, xMax, yMinL, yMaxL, yMinR, yMaxR, logScale, showDeriv){
+  function drawAxes(xMin, xMax, yMinL, yMaxL, logScale){
     const W = logicalW, H = logicalH;
-    const padL = 64, padR = showDeriv ? 70 : 18, padT = 16, padB = 34;
+    const padL = 64, padR = 18, padT = 16, padB = 34;
     const plotW = W - padL - padR, plotH = H - padT - padB;
 
     ctx.fillStyle = '#05080a';
@@ -326,31 +303,12 @@
       ctx.fillText(label, padL-8, gy+4);
     }
 
-    if(showDeriv){
-      // right axis labels (derivative), and a zero-reference line
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--deriv').trim();
-      ctx.textAlign = 'left';
-      for(let j=0;j<=nY;j++){
-        const gy = padT + plotH*j/nY;
-        const yv = yMaxR - (yMaxR-yMinR)*j/nY;
-        ctx.fillText(fmtI(yv), padL+plotW+8, gy+4);
-      }
-      // zero line for derivative axis
-      if(yMinR < 0 && yMaxR > 0){
-        const zeroY = padT + plotH*(1 - (0-yMinR)/(yMaxR-yMinR));
-        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-        ctx.setLineDash([3,3]);
-        ctx.beginPath(); ctx.moveTo(padL,zeroY); ctx.lineTo(padL+plotW,zeroY); ctx.stroke();
-        ctx.setLineDash([]);
-      }
-    }
+    
 
     // axis frame
     ctx.strokeStyle = '#2e3d49';
     ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+plotH); ctx.lineTo(padL+plotW,padT+plotH); ctx.stroke();
-    if(showDeriv){
-      ctx.beginPath(); ctx.moveTo(padL+plotW,padT); ctx.lineTo(padL+plotW,padT+plotH); ctx.stroke();
-    }
+    
 
     ctx.fillStyle = '#57d8e0';
     ctx.textAlign = 'center';
@@ -364,19 +322,12 @@
     ctx.fillText(logScale ? 'log10 intensity' : 'intensity', 0, 0);
     ctx.restore();
 
-    if(showDeriv){
-      ctx.save();
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--deriv').trim();
-      ctx.translate(W-10, padT+plotH/2);
-      ctx.rotate(Math.PI/2);
-      ctx.fillText('dI/dx', 0, 0);
-      ctx.restore();
-    }
+    
 
     return {padL,padR,padT,padB,plotW,plotH};
   }
 
-  function renderDual(ysLeft, ysDeriv, xMin, xMax, logScale, showDeriv, upTo, xs){
+  function renderIntensity(ysLeft, xMin, xMax, logScale, upTo, xs){
     let yMinL = Infinity, yMaxL = -Infinity;
     for(let i=0;i<ysLeft.length;i++){
       const v = ysLeft[i];
@@ -389,29 +340,17 @@
     let padL_ = (yMaxL-yMinL)*0.08;
     yMinL -= padL_; yMaxL += padL_;
 
-    let yMaxR = 1;
-    if(showDeriv){
-      let maxAbs = 0;
-      for(let i=0;i<ysDeriv.length;i++){
-        const v = ysDeriv[i];
-        if(v===null || !isFinite(v)) continue;
-        if(Math.abs(v)>maxAbs) maxAbs = Math.abs(v);
-      }
-      yMaxR = (maxAbs>0) ? maxAbs*1.12 : 1;
-    }
-    const yMinR = -yMaxR;
-
-    const geo = drawDualAxes(xMin, xMax, yMinL, yMaxL, yMinR, yMaxR, logScale, showDeriv);
+const geo = drawAxes(xMin, xMax, yMinL, yMaxL, logScale);
     const {padL,padT,plotW,plotH} = geo;
     const lim = (upTo===undefined) ? ysLeft.length : upTo;
 
     let started = false;
-    // Left trace can be hidden without changing peak calculations or axes.
-    if($('v_intensity').checked){
+    // Intensity trace.
+    {
       ctx.beginPath();
       ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--trace').trim();
       ctx.lineWidth = 1.6;
-      ctx.shadowColor = 'rgba(111,224,168,0.55)';
+      ctx.shadowColor = 'rgba(255,176,32,0.55)';
       ctx.shadowBlur = 6;
       for(let i=0;i<lim;i++){
         const v = ysLeft[i];
@@ -424,23 +363,10 @@
       ctx.shadowBlur = 0;
     }
 
-    // right trace: derivative
-    if(showDeriv){
-      ctx.beginPath();
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--deriv').trim();
-      ctx.lineWidth = 1.3;
-      started = false;
-      for(let i=0;i<lim;i++){
-        const v = ysDeriv[i];
-        const px = padL + plotW*(xs ? (xs[i]-xMin)/(xMax-xMin) : i/(ysLeft.length-1));
-        if(v===null || !isFinite(v)){ started=false; continue; }
-        const py = padT + plotH*(1 - (v-yMinR)/(yMaxR-yMinR));
-        if(!started){ ctx.moveTo(px,py); started=true; } else { ctx.lineTo(px,py); }
-      }
-      ctx.stroke();
-    }
 
-    return {yMinL,yMaxL,yMinR,yMaxR,geo};
+    
+
+    return {yMinL,yMaxL,geo};
   }
 
   let lastResult = null;
@@ -460,7 +386,6 @@
     let sampleDx = (parseFloat($('v_sampleDx').value) * 1e-3);
     if(!isFinite(sampleDx) || sampleDx<=0) sampleDx = 0.00005;
     const logScale = $('v_log').checked;
-    const showDeriv = $('v_deriv').checked;
 
     resizeCanvas();
     // Use a fixed, user-selected physical sampling grid anchored at x = 0.
@@ -476,17 +401,11 @@
     const xs = Array.from({length:nPixels}, (_, k) => sampleXMin + k*sampleDx);
     const ysRaw = new Array(nPixels).fill(0);
     const ysPlot = new Array(nPixels).fill(null);
-    let ysDeriv = new Array(nPixels).fill(null);
 
     $('statN').textContent = N.toLocaleString();
     $('statRange').textContent = fmtX(xMin) + ' … ' + fmtX(xMax);
 
-    // Fixed physical step for the derivative, independent of zoom or screen resolution.
-    // Any real angular aperture bounds I(x)'s fastest possible oscillation to a period >= lambda,
-    // so a step this much smaller than lambda safely resolves the true local slope everywhere,
-    // and (critically) gives the SAME slope estimate no matter what window you're viewing.
-    const H_DERIV = pr.lambda/20;
-    const batchSize = 4000;
+    const batchSize = Math.max(1, Math.floor(2000000 / (N+1)) || 1);
     let i = 0;
     let runningMax = -Infinity;
 
@@ -498,30 +417,13 @@
         ysRaw[i] = intensity;
         if(intensity>runningMax) runningMax = intensity;
         ysPlot[i] = logScale ? (intensity>0 ? Math.log10(intensity) : null) : intensity;
-        if(showDeriv){
-          const hi = intensityAt(x + H_DERIV, pr, N);
-          const central = x - H_DERIV >= calculationXMin;
-          const lo = central ? intensityAt(x - H_DERIV, pr, N) : intensity;
-          ysDeriv[i] = (hi - lo) / ((central ? 2 : 1)*H_DERIV);
-        }
+        
       }
-      let maxDerivSoFar = -Infinity, minDerivSoFar = Infinity;
-      if(showDeriv){
-        for(let k=0;k<i;k++){
-          if(ysDeriv[k]===null) continue;
-          if(ysDeriv[k]>maxDerivSoFar) maxDerivSoFar = ysDeriv[k];
-          if(ysDeriv[k]<minDerivSoFar) minDerivSoFar = ysDeriv[k];
-        }
-      }
+      
       progressbar.style.width = (nPixels ? 100*i/nPixels : 100).toFixed(1)+'%';
-      renderDual(ysPlot, ysDeriv, xMin, xMax, logScale, showDeriv, i, xs);
+      renderIntensity(ysPlot, xMin, xMax, logScale, i, xs);
       $('statMax').textContent = fmtI(isFinite(runningMax) ? runningMax : null);
-      if(showDeriv){
-        $('statMaxDeriv').textContent = fmtI(isFinite(maxDerivSoFar)?maxDerivSoFar:null);
-        $('statMinDeriv').textContent = fmtI(isFinite(minDerivSoFar)?minDerivSoFar:null);
-      }
-      legend.style.display = (showDeriv || $('v_intensity').checked) ? 'flex' : 'none';
-      $('legendIntensity').style.display = $('v_intensity').checked ? '' : 'none';
+      
       if(i<nPixels){
         requestAnimationFrame(step);
       } else {
@@ -531,10 +433,9 @@
         busy = false;
         $('btnCompute').disabled = false;
         lastResult = {
-          xMin, xMax, screenXMin, calculationXMin, nPixels, sampleDx, sampleXMin, xs, logScale, showDeriv,
+          xMin, xMax, screenXMin, calculationXMin, nPixels, sampleDx, sampleXMin, xs, logScale,
           rawI: ysRaw,        // unsmoothed intensity, straight from the sweep
-          rawDeriv: ysDeriv,  // exact fixed-h derivative (only meaningful pre-smoothing)
-          ysRaw, ysPlot, ysDeriv // "current display" arrays, updated by updateDisplay()
+          ysRaw, ysPlot // "current display" arrays, updated by updateDisplay()
         };
         updateDisplay();
       }
@@ -564,70 +465,31 @@
     return out;
   }
 
-  // Recompute the displayed curve (and its derivative + peak stats) from the cached
+  // Recompute the displayed intensity and peak statistics from the cached
   // raw sweep data, applying smoothing if requested. This is cheap (pure array math,
   // no re-summing the grating), so it updates live without needing a re-sweep.
   function updateDisplay(){
     if(!lastResult) return;
-    const {xMin, xMax, nPixels, sampleDx, xs, logScale, showDeriv, rawI, rawDeriv} = lastResult;
-    const smoothOn = $('v_smooth').checked;
-    // Smoothing width is specified in physical units (metres), not pixels, so the
-    // filter covers the same real distance regardless of how zoomed in you are.
-    // It's converted to a pixel count here only because the box filter operates on
-    // the sampled array; that pixel count changes with zoom, but the physical width
-    // (and therefore the resulting slopes) does not.
-    const smoothWidthM = Math.max(0, (parseFloat($('smoothWindow').value) * 1e-3) || 0);
-
-    let curI, curDeriv;
-    if(smoothOn){
-      curI = smoothArray(rawI, smoothWidthM, sampleDx);
-      curDeriv = new Array(nPixels).fill(null);
-      if(showDeriv && nPixels > 1){
-        for(let k=0;k<nPixels;k++){
-          if(k>0 && k<nPixels-1) curDeriv[k] = (curI[k+1]-curI[k-1])/(2*sampleDx);
-          else if(k===0) curDeriv[k] = (curI[1]-curI[0])/sampleDx;
-          else curDeriv[k] = (curI[k]-curI[k-1])/sampleDx;
-        }
-      }
-    } else {
-      curI = rawI;
-      curDeriv = rawDeriv;
-    }
+    const {xMin, xMax, sampleDx, xs, logScale, rawI} = lastResult;
+    const smoothWidthM = Math.max(0, parseFloat($('smoothWindow').value)*1e-3 || 0);
+    const curI = $('v_smooth').checked ? smoothArray(rawI, smoothWidthM, sampleDx) : rawI;
     const curPlot = curI.map(v => logScale ? (v>0 ? Math.log10(v) : null) : v);
-
     lastResult.ysRaw = curI;
-    lastResult.ysDeriv = curDeriv;
     lastResult.ysPlot = curPlot;
-
-    let maxI = -Infinity, maxD = -Infinity, minD = Infinity;
-    for(let k=0;k<nPixels;k++){
-      if(curI[k]>maxI) maxI = curI[k];
-      if(showDeriv && curDeriv[k]!==null){
-        if(curDeriv[k]>maxD) maxD = curDeriv[k];
-        if(curDeriv[k]<minD) minD = curDeriv[k];
-      }
-    }
-    $('statMax').textContent = fmtI(isFinite(maxI)?maxI:null);
-    if(showDeriv){
-      $('statMaxDeriv').textContent = fmtI(isFinite(maxD)?maxD:null);
-      $('statMinDeriv').textContent = fmtI(isFinite(minD)?minD:null);
-    } else {
-      $('statMaxDeriv').textContent = '–';
-      $('statMinDeriv').textContent = '–';
-    }
-    legend.style.display = (showDeriv || $('v_intensity').checked) ? 'flex' : 'none';
-    $('legendIntensity').style.display = $('v_intensity').checked ? '' : 'none';
-
-    renderDual(curPlot, curDeriv, xMin, xMax, logScale, showDeriv, undefined, xs);
+    let maxI = -Infinity;
+    for(const value of curI) if(value>maxI) maxI=value;
+    $('statMax').textContent = fmtI(isFinite(maxI) ? maxI : null);
+    renderIntensity(curPlot, xMin, xMax, logScale, undefined, xs);
   }
   $('v_smooth').addEventListener('change', updateDisplay);
-  $('v_intensity').addEventListener('change', updateDisplay);
   $('smoothWindow').addEventListener('input', updateDisplay);
 
   // Segment the current window's intensity trace into distinct bright "peak groups"
   // (contiguous runs above a threshold fraction of the window's own max I), and report
   // the peak intensity plus the steepest rising (max) and falling (min) slope within
   // each group separately, rather than one number for the whole window.
+  // Find top shoulders from the sampled, currently displayed intensity.
+  // Peak positions are independent of logarithmic display.
   function peakShoulderMidpoint(values,xs,start,end){
     // Use the outer top turning points of the threshold-defined peak group,
     // not the highest internal ripple or the steepest internal slope.
@@ -649,7 +511,7 @@
 
   function analyzePeaks(){
     if(!lastResult) return;
-    const {ysRaw, ysDeriv, showDeriv, nPixels, xs} = lastResult;
+    const {ysRaw, nPixels, xs} = lastResult;
     const listEl = $('peakList');
     let globalMax = -Infinity;
     for(let i=0;i<nPixels;i++){ if(ysRaw[i]>globalMax) globalMax = ysRaw[i]; }
@@ -667,20 +529,15 @@
       if(!above && curStart!==null){
         const curEnd = i-1;
         let maxI=-Infinity, maxIIdx=curStart;
-        let maxD=-Infinity, minD=Infinity;
         for(let k=curStart;k<=curEnd;k++){
           if(ysRaw[k]>maxI){ maxI=ysRaw[k]; maxIIdx=k; }
-          if(showDeriv && ysDeriv[k]!==null){
-            if(ysDeriv[k]>maxD) maxD=ysDeriv[k];
-            if(ysDeriv[k]<minD) minD=ysDeriv[k];
-          }
+          
         }
         const shoulders = peakShoulderMidpoint(ysRaw,xs,curStart,curEnd);
         const xPeak = shoulders ? shoulders.xPeak : null;
         peaks.push({
           xPeak, maxI, shoulders,
-          maxD: isFinite(maxD) ? maxD : null,
-          minD: isFinite(minD) ? minD : null
+
         });
         curStart = null;
       }
@@ -693,25 +550,23 @@
     }
     const rows = peaks.map((p,idx)=>
       '<tr><td>'+(idx+1)+'</td><td>'+(p.shoulders ? fmtX(p.shoulders.xLeft) : '&ndash;')+'</td><td>'+(p.shoulders ? fmtX(p.shoulders.xRight) : '&ndash;')+'</td><td title="'+(p.shoulders ? 'Top shoulders: '+fmtX(p.shoulders.xLeft)+' and '+fmtX(p.shoulders.xRight) : 'Both top shoulders are not resolved; expand the view or reduce sample spacing')+'">'+(p.xPeak===null ? '&ndash;' : fmtX(p.xPeak))+'</td>'+ 
-      '<td class="iv">'+fmtI(p.maxI)+'</td>'+
-      '<td class="dvmax">'+(showDeriv ? fmtI(p.maxD) : '&ndash;')+'</td>'+
-      '<td class="dvmin">'+(showDeriv ? fmtI(p.minD) : '&ndash;')+'</td></tr>'
+      '<td class="iv">'+fmtI(p.maxI)+'</td></tr>'
     ).join('');
     listEl.innerHTML = '<table class="peaktable"><thead><tr>'+
-      '<th>#</th><th>x (left turning point)</th><th>x (right turning point)</th><th>x (peak midpoint)</th><th>max I</th><th>max dI/dx</th><th>min dI/dx</th>'+
+      '<th>#</th><th>x (left turning point)</th><th>x (right turning point)</th><th>x (peak midpoint)</th><th>max I</th>'+
       '</tr></thead><tbody>'+rows+'</tbody></table><p class="muted">x (peak) = (x of left top shoulder + x of right top shoulder) / 2, using the first and last top turning points in each threshold-defined peak group, estimated from the displayed intensity samples. White dotted lines mark these midpoints. A dash means both shoulders are not resolved in this view.</p>';
   }
   $('peakThreshold').addEventListener('input', ()=>{ if(lastResult){ redrawFromCache(); } });
 
   function redrawFromCache(){
     if(!lastResult) return;
-    renderDual(lastResult.ysPlot, lastResult.ysDeriv, lastResult.xMin, lastResult.xMax, lastResult.logScale, lastResult.showDeriv, undefined, lastResult.xs);
+    renderIntensity(lastResult.ysPlot, lastResult.lastResult.xMin, lastResult.xMax, lastResult.logScale, undefined, lastResult.xs);
   }
 
   let drawGeoCache = null;
-  const origRenderDual = renderDual;
-  renderDual = function(ysLeft, ysDeriv, xMin, xMax, logScale, showDeriv, upTo, xs){
-    const r = origRenderDual(ysLeft, ysDeriv, xMin, xMax, logScale, showDeriv, upTo, xs);
+  const origRenderIntensity = renderIntensity;
+  renderIntensity = function(ysLeft, xMin, xMax, logScale, upTo, xs){
+    const r = origRenderIntensity(ysLeft, xMin, xMax, logScale, upTo, xs);
     drawGeoCache = r.geo;
     // Draw the same y = p% × max(I) threshold used by analyzePeaks().
     if(lastResult && lastResult.ysRaw){
@@ -810,11 +665,9 @@
     const idx = Math.max(0, Math.min(lastResult.nPixels-1, Math.round((targetX-lastResult.sampleXMin)/lastResult.sampleDx)));
     const x = lastResult.xs[idx];
     const val = lastResult.ysRaw[idx];
-    const dv = lastResult.ysDeriv ? lastResult.ysDeriv[idx] : null;
     scrubReadout.innerHTML = '<span class="label">At cursor</span>' +
       ' x = <b class="iv">'+fmtX(x)+'</b>' +
-      ' &nbsp; I = <b class="iv">'+fmtI(val)+'</b>' +
-      (lastResult.showDeriv ? ' &nbsp; dI/dx = <b class="dv">'+fmtI(dv)+'</b>' : '');
+      ' &nbsp; I = <b class="iv">'+fmtI(val)+'</b>';
 
     redrawFromCache();
     const px = padL + plotW*(x-lastResult.xMin)/(lastResult.xMax-lastResult.xMin);
@@ -829,7 +682,7 @@
   canvas.addEventListener('mousemove', (ev)=>{
     if(!lastResult) return;
     const rect = canvas.getBoundingClientRect();
-    drawCrosshairAt(ev.clientX-rect.left);
+    drawCrosshairAt((ev.clientX-rect.left)*logicalW/rect.width);
   });
   canvas.addEventListener('mouseleave', ()=>{
     if(!lastResult) return;
@@ -846,6 +699,7 @@
   }
   $('p_Lambda').addEventListener('input', ()=>syncGratingInputs('p_Lambda', 'p_pitch'));
   $('p_pitch').addEventListener('input', ()=>syncGratingInputs('p_pitch', 'p_Lambda'));
+
   $('btnReset').addEventListener('click', ()=>{
     // Restore every form control to the default declared in this page.
     document.querySelectorAll('input, select').forEach(control=>{
